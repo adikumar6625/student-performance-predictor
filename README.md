@@ -1,5 +1,6 @@
 # Report Card — Student Performance Predictor
-
+https://student-performance-predictor-gyi8o9ep4-adikumar6625s-projects.vercel.app
+🔗 **[Live demo](https://student-performance-predictor-gyi8o9ep4-adikumar6625s-projects.vercel.app)**  ·  🔧 **[Backend API](https://student-performance-api-n7u6.onrender.com/docs)**
 A full-stack machine learning project: a **Linear Regression** model (trained
 with `pandas` + `scikit-learn`) predicts a student's exam performance from
 study habits, served by a **FastAPI** backend and visualized in a custom

@@ -1,0 +1,13 @@
+# Render "Blueprint" — lets you deploy this backend with one click via
+# https://dashboard.render.com/blueprints (New + > Blueprint > point at your repo)
+services:
+  - type: web
+    name: student-performance-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: "*"   # tighten to your Vercel URL after first deploy, e.g. https://your-app.vercel.app
+    healthCheckPath: /api/health

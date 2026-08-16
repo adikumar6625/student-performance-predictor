@@ -1,0 +1,95 @@
+{
+  "n_rows": 1000,
+  "n_features": 7,
+  "correlation_with_target": {
+    "hours_studied": 0.535,
+    "previous_score": 0.479,
+    "sample_papers_solved": 0.282,
+    "attendance_pct": 0.265,
+    "parental_support": 0.147,
+    "sleep_hours": 0.116,
+    "extracurricular": 0.108
+  },
+  "summary_stats": {
+    "hours_studied": {
+      "count": 1000.0,
+      "mean": 5.44,
+      "std": 2.16,
+      "min": 0.0,
+      "25%": 4.0,
+      "50%": 5.5,
+      "75%": 6.8,
+      "max": 12.0
+    },
+    "attendance_pct": {
+      "count": 1000.0,
+      "mean": 78.9,
+      "std": 11.63,
+      "min": 43.4,
+      "25%": 71.38,
+      "50%": 79.5,
+      "75%": 87.12,
+      "max": 100.0
+    },
+    "previous_score": {
+      "count": 1000.0,
+      "mean": 65.57,
+      "std": 14.81,
+      "min": 35.0,
+      "25%": 55.1,
+      "50%": 65.55,
+      "75%": 75.9,
+      "max": 100.0
+    },
+    "sleep_hours": {
+      "count": 1000.0,
+      "mean": 6.5,
+      "std": 1.13,
+      "min": 4.0,
+      "25%": 5.7,
+      "50%": 6.5,
+      "75%": 7.3,
+      "max": 9.0
+    },
+    "sample_papers_solved": {
+      "count": 1000.0,
+      "mean": 3.95,
+      "std": 2.02,
+      "min": 0.0,
+      "25%": 3.0,
+      "50%": 4.0,
+      "75%": 5.0,
+      "max": 10.0
+    },
+    "extracurricular": {
+      "count": 1000.0,
+      "mean": 0.46,
+      "std": 0.5,
+      "min": 0.0,
+      "25%": 0.0,
+      "50%": 0.0,
+      "75%": 1.0,
+      "max": 1.0
+    },
+    "parental_support": {
+      "count": 1000.0,
+      "mean": 2.01,
+      "std": 0.82,
+      "min": 1.0,
+      "25%": 1.0,
+      "50%": 2.0,
+      "75%": 3.0,
+      "max": 3.0
+    },
+    "performance_index": {
+      "count": 1000.0,
+      "mean": 61.68,
+      "std": 11.05,
+      "min": 30.3,
+      "25%": 53.8,
+      "50%": 61.8,
+      "75%": 69.1,
+      "max": 100.0
+    }
+  }
+}

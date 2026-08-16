@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+:root {
+  --ink-bg: #0b1220;
+  --ink-panel: #121b2e;
+  --ink-panel-alt: #17223a;
+  --ink-line: #263151;
+  --ink-line-soft: #1c2740;
+  --amber: #e8b84b;
+  --amber-soft: #f2cd7c;
+  --teal: #4fd8c0;
+  --red-ink: #e2574c;
+  --text-primary: #edf1f7;
+  --text-muted: #8a94ac;
+}
+
+html, body {
+  background: var(--ink-bg);
+  color: var(--text-primary);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.font-serif-display {
+  font-family: "Source Serif 4", Georgia, serif;
+}
+
+.font-mono-data {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+.ledger-rule {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 39px,
+    var(--ink-line-soft) 40px
+  );
+}
+
+.paper-grain {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--ink-bg); }
+::-webkit-scrollbar-thumb { background: var(--ink-line); border-radius: 8px; }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--ink-line);
+  border-radius: 999px;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--amber);
+  border: 3px solid var(--ink-bg);
+  box-shadow: 0 0 0 1px var(--amber);
+  cursor: pointer;
+}
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  background: var(--ink-line);
+  border-radius: 999px;
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: var(--amber);
+  border: 3px solid var(--ink-bg);
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

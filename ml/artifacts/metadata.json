@@ -1,0 +1,61 @@
+{
+  "features": [
+    "hours_studied",
+    "previous_score",
+    "sample_papers_solved",
+    "attendance_pct",
+    "parental_support",
+    "sleep_hours",
+    "extracurricular"
+  ],
+  "target": "performance_index",
+  "metrics": {
+    "r2_score": 0.7321,
+    "mae": 4.482,
+    "rmse": 5.713,
+    "n_train": 800,
+    "n_test": 200,
+    "cv_r2_mean": 0.6839,
+    "cv_r2_std": 0.038
+  },
+  "coefficients": {
+    "hours_studied": 5.757,
+    "previous_score": 4.946,
+    "sample_papers_solved": 3.165,
+    "attendance_pct": 2.847,
+    "parental_support": 1.863,
+    "sleep_hours": 1.021,
+    "extracurricular": 1.035
+  },
+  "intercept": 61.697,
+  "feature_ranges": {
+    "hours_studied": [
+      0.0,
+      12.0
+    ],
+    "previous_score": [
+      35.0,
+      100.0
+    ],
+    "sample_papers_solved": [
+      0.0,
+      10.0
+    ],
+    "attendance_pct": [
+      43.4,
+      100.0
+    ],
+    "parental_support": [
+      1.0,
+      3.0
+    ],
+    "sleep_hours": [
+      4.0,
+      9.0
+    ],
+    "extracurricular": [
+      0.0,
+      1.0
+    ]
+  }
+}

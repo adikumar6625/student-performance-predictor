@@ -1,7 +1,9 @@
-import { FEATURE_CONFIG } from "../features";
+import { ALL_FEATURE_KEYS, FEATURE_CONFIG } from "../features";
 
-export default function StudentForm({ values, onChange, onSubmit, submitting }) {
+export default function StudentForm({ values, onChange, onSubmit, submitting, selectedFeatures, onEditParameters }) {
   const update = (key, val) => onChange({ ...values, [key]: val });
+  const visibleKeys = selectedFeatures ?? ALL_FEATURE_KEYS;
+  const hiddenCount = ALL_FEATURE_KEYS.length - visibleKeys.length;
 
   return (
     <form
@@ -9,17 +11,29 @@ export default function StudentForm({ values, onChange, onSubmit, submitting }) 
         e.preventDefault();
         onSubmit();
       }}
-      className="rounded-2xl border border-[var(--ink-line)] bg-[var(--ink-panel)] p-6 sm:p-8"
+      className="rounded-2xl border border-[var(--ink-line)] bg-[var(--ink-panel)] p-5 sm:p-8 transition-shadow hover:shadow-2xl hover:shadow-black/20"
     >
-      <div className="flex items-baseline justify-between mb-6">
+      <div className="flex items-baseline justify-between mb-1">
         <h2 className="font-serif-display text-xl">Student Record</h2>
         <span className="font-mono-data text-[11px] text-[var(--text-muted)]">
           entry no. 07
         </span>
       </div>
 
+      {onEditParameters && (
+        <button
+          type="button"
+          onClick={onEditParameters}
+          className="text-[11px] font-mono-data text-[var(--text-muted)] hover:text-[var(--amber)] transition-colors mb-5 sm:mb-6"
+        >
+          edit factors{hiddenCount > 0 ? ` (${hiddenCount} held at class average)` : ""} →
+        </button>
+      )}
+
       <div className="space-y-6">
-        {Object.entries(FEATURE_CONFIG).map(([key, cfg]) => (
+        {visibleKeys.map((key) => {
+          const cfg = FEATURE_CONFIG[key];
+          return (
           <div key={key} className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2">
             <label htmlFor={key} className="text-sm text-[var(--text-muted)] col-span-2 sm:col-span-1">
               {cfg.label}
@@ -82,7 +96,8 @@ export default function StudentForm({ values, onChange, onSubmit, submitting }) 
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <button

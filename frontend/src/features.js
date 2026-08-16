@@ -1,6 +1,7 @@
 export const FEATURE_CONFIG = {
   hours_studied: {
     label: "Hours Studied / Week",
+    description: "Time spent studying outside class each week",
     unit: "hrs",
     min: 0,
     max: 12,
@@ -10,6 +11,7 @@ export const FEATURE_CONFIG = {
   },
   attendance_pct: {
     label: "Attendance",
+    description: "Share of classes attended this term",
     unit: "%",
     min: 40,
     max: 100,
@@ -19,6 +21,7 @@ export const FEATURE_CONFIG = {
   },
   previous_score: {
     label: "Previous Exam Score",
+    description: "Result from the last exam cycle",
     unit: "%",
     min: 35,
     max: 100,
@@ -28,6 +31,7 @@ export const FEATURE_CONFIG = {
   },
   sleep_hours: {
     label: "Sleep / Night",
+    description: "Average hours of sleep per night",
     unit: "hrs",
     min: 4,
     max: 9,
@@ -37,6 +41,7 @@ export const FEATURE_CONFIG = {
   },
   sample_papers_solved: {
     label: "Practice Papers Solved",
+    description: "Mock/sample papers completed before the exam",
     unit: "papers",
     min: 0,
     max: 10,
@@ -46,6 +51,7 @@ export const FEATURE_CONFIG = {
   },
   extracurricular: {
     label: "Extracurricular Activities",
+    description: "Involved in clubs, sports, or similar activities",
     unit: "",
     min: 0,
     max: 1,
@@ -55,6 +61,7 @@ export const FEATURE_CONFIG = {
   },
   parental_support: {
     label: "Parental Support",
+    description: "Level of support and involvement at home",
     unit: "",
     min: 1,
     max: 3,
@@ -68,6 +75,8 @@ export const FEATURE_CONFIG = {
     ],
   },
 };
+
+export const ALL_FEATURE_KEYS = Object.keys(FEATURE_CONFIG);
 
 export const defaultFormValues = () =>
   Object.fromEntries(

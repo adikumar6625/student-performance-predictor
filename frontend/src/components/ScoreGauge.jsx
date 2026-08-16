@@ -13,12 +13,37 @@ function gradeColor(grade) {
 
 export default function ScoreGauge({ score, grade, loading }) {
   const [animated, setAnimated] = useState(0);
+  const [displayScore, setDisplayScore] = useState(0);
 
   useEffect(() => {
     if (score == null) return;
     setAnimated(0);
     const id = requestAnimationFrame(() => setAnimated(score));
     return () => cancelAnimationFrame(id);
+  }, [score]);
+
+  // Count the digits up from 0 to the final score over ~900ms, easing out.
+  useEffect(() => {
+    if (score == null) {
+      setDisplayScore(0);
+      return;
+    }
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      setDisplayScore(score);
+      return;
+    }
+    const duration = 900;
+    const start = performance.now();
+    let raf;
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setDisplayScore(score * eased);
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
   }, [score]);
 
   const pct = Math.max(0, Math.min(100, animated ?? 0)) / 100;
@@ -76,8 +101,8 @@ export default function ScoreGauge({ score, grade, loading }) {
           </>
         ) : (
           <>
-            <span className="font-serif-display text-5xl font-semibold" style={{ color }}>
-              {score.toFixed(1)}
+            <span className="font-serif-display text-4xl sm:text-5xl font-semibold tabular-nums" style={{ color }}>
+              {displayScore.toFixed(1)}
             </span>
             <span
               className="font-serif-display italic text-lg mt-1 border-2 rounded-full w-11 h-11 flex items-center justify-center"

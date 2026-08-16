@@ -1,7 +1,7 @@
 import { Bar, BarChart, Cell, ResponsiveContainer, ReferenceLine, Tooltip, XAxis, YAxis } from "recharts";
 import { FEATURE_CONFIG } from "../features";
 
-export default function ContributionChart({ contributions }) {
+export default function ContributionChart({ contributions, selectedFeatures }) {
   if (!contributions) {
     return (
       <div className="h-64 flex items-center justify-center text-sm text-[var(--text-muted)] font-mono-data">
@@ -10,11 +10,12 @@ export default function ContributionChart({ contributions }) {
     );
   }
 
-  const data = Object.entries(contributions)
-    .map(([key, value]) => ({
+  const keys = selectedFeatures ?? Object.keys(contributions);
+  const data = keys
+    .map((key) => ({
       key,
       name: FEATURE_CONFIG[key]?.label ?? key,
-      value,
+      value: contributions[key] ?? 0,
     }))
     .sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
 

@@ -33,7 +33,7 @@ export default function ContributionChart({ contributions, selectedFeatures }) {
         />
         <ReferenceLine x={0} stroke="var(--ink-line)" />
         <Tooltip
-          cursor={{ fill: "rgba(255,255,255,0.03)" }}
+          cursor={{ fill: "rgba(35,38,45,0.05)" }}
           contentStyle={{ background: "var(--ink-panel-alt)", border: "1px solid var(--ink-line)", borderRadius: 8, fontSize: 12 }}
           labelStyle={{ color: "var(--text-primary)" }}
           formatter={(v) => [`${v > 0 ? "+" : ""}${v} pts`, "contribution"]}

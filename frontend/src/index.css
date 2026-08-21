@@ -1,17 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --ink-bg: #0b1220;
-  --ink-panel: #121b2e;
-  --ink-panel-alt: #17223a;
-  --ink-line: #263151;
-  --ink-line-soft: #1c2740;
-  --amber: #e8b84b;
-  --amber-soft: #f2cd7c;
-  --teal: #4fd8c0;
-  --red-ink: #e2574c;
-  --text-primary: #edf1f7;
-  --text-muted: #8a94ac;
+  /* "Notebook paper" palette — cream page, blue ruled lines,
+     pencil-yellow highlighter as the primary accent, red pen for
+     corrections, green pen for positive results. */
+  --ink-bg: #f7f2e7;
+  --ink-panel: #ffffff;
+  --ink-panel-alt: #fcf9f0;
+  --ink-line: #b9cce1;
+  --ink-line-soft: #dde7f1;
+  --amber: #f2b705;
+  --amber-soft: #f6c945;
+  --teal: #2f9e64;
+  --red-ink: #d6483a;
+  --text-primary: #23262d;
+  --text-muted: #6b7280;
 }
 
 html, body {
@@ -38,7 +41,7 @@ html, body {
 }
 
 .paper-grain {
-  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, rgba(35,38,45,0.05) 1px, transparent 0);
   background-size: 22px 22px;
 }
 

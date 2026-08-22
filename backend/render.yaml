@@ -10,4 +10,6 @@ services:
     envVars:
       - key: ALLOWED_ORIGINS
         value: "*"   # tighten to your Vercel URL after first deploy, e.g. https://your-app.vercel.app
+      - key: JWT_SECRET_KEY
+        generateValue: true   # Render will generate a random secret for signing login tokens
     healthCheckPath: /api/health

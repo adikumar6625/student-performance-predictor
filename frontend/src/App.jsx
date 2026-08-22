@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
-import { getEda, getModelInfo, predict } from "./api";
+import {
+  createCourse,
+  deleteCourse,
+  deletePrediction,
+  getCoursePredictions,
+  getEda,
+  getModelInfo,
+  listCourses,
+  predict,
+} from "./api";
 import { ALL_FEATURE_KEYS, defaultFormValues } from "./features";
 import { buildRemark } from "./remark";
 import { usePredictionHistory } from "./usePredictionHistory";
 import { useLocalStorageState } from "./useLocalStorageState";
+import { useAuth } from "./useAuth";
 
 import ScoreGauge from "./components/ScoreGauge";
 import StudentForm from "./components/StudentForm";
@@ -12,12 +22,28 @@ import CorrelationChart from "./components/CorrelationChart";
 import ModelLedger from "./components/ModelLedger";
 import HistoryPanel from "./components/HistoryPanel";
 import ParameterSelector from "./components/ParameterSelector";
+import AuthScreen from "./components/AuthScreen";
+import CourseSwitcher from "./components/CourseSwitcher";
+import RecommendationsPanel from "./components/RecommendationsPanel";
 import Reveal from "./components/Reveal";
 import Toast from "./components/Toast";
 import { ChartSkeleton, LedgerSkeleton } from "./components/Skeletons";
 
+function backendPredictionToHistoryEntry(p) {
+  return {
+    id: p.id,
+    timestamp: new Date(p.created_at).getTime(),
+    values: p.values,
+    predicted_score: p.predicted_score,
+    grade: p.grade,
+  };
+}
+
 export default function App() {
-  const [stage, setStage] = useState("select"); // 'select' | 'dashboard'
+  const auth = useAuth();
+  const [guestMode, setGuestMode] = useLocalStorageState("report-card:guest-mode", false);
+  const [stage, setStage] = useState("select"); // 'select' | 'dashboard' (auth handled separately below)
+
   const [selectedFeatures, setSelectedFeatures] = useLocalStorageState(
     "report-card:selected-features",
     ALL_FEATURE_KEYS
@@ -34,7 +60,12 @@ export default function App() {
   const [backendError, setBackendError] = useState(false);
   const [toast, setToast] = useState(null);
 
-  const { history, addEntry, removeEntry, clearHistory } = usePredictionHistory();
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+  const [activeCourseId, setActiveCourseId] = useLocalStorageState("report-card:active-course-id", null);
+  const [remoteHistory, setRemoteHistory] = useState([]);
+
+  const localHistory = usePredictionHistory();
 
   const loadDashboardData = () => {
     setDashboardLoading(true);
@@ -52,13 +83,70 @@ export default function App() {
     loadDashboardData();
   }, []);
 
+  // Load this user's courses once authed, and auto-pick the first one.
+  useEffect(() => {
+    if (!auth.isAuthed) {
+      setCourses([]);
+      return;
+    }
+    setCoursesLoading(true);
+    listCourses(auth.token)
+      .then((list) => {
+        setCourses(list);
+        setActiveCourseId((current) => {
+          if (current && list.some((c) => c.id === current)) return current;
+          return list[0]?.id ?? null;
+        });
+      })
+      .catch(() => {})
+      .finally(() => setCoursesLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth.isAuthed]);
+
+  // Load prediction history for the active course.
+  useEffect(() => {
+    if (!auth.isAuthed || !activeCourseId) {
+      setRemoteHistory([]);
+      return;
+    }
+    getCoursePredictions(activeCourseId, auth.token)
+      .then(setRemoteHistory)
+      .catch(() => setRemoteHistory([]));
+  }, [auth.isAuthed, activeCourseId, auth.token]);
+
+  const handleCreateCourse = async (name) => {
+    const course = await createCourse(name, auth.token);
+    setCourses((prev) => [...prev, course]);
+    setActiveCourseId(course.id);
+  };
+
+  const handleDeleteCourse = async (courseId) => {
+    await deleteCourse(courseId, auth.token);
+    setCourses((prev) => prev.filter((c) => c.id !== courseId));
+    if (activeCourseId === courseId) setActiveCourseId(null);
+  };
+
+  const refreshRemoteHistory = () => {
+    if (auth.isAuthed && activeCourseId) {
+      getCoursePredictions(activeCourseId, auth.token).then(setRemoteHistory).catch(() => {});
+    }
+  };
+
   const handleSubmit = async () => {
     setSubmitting(true);
     setError(null);
     try {
-      const res = await predict(formValues);
+      const payload =
+        auth.isAuthed && activeCourseId ? { ...formValues, course_id: activeCourseId } : formValues;
+      const res = await predict(payload, auth.isAuthed ? auth.token : null);
       setResult(res);
-      addEntry(formValues, res);
+
+      if (res.saved) {
+        refreshRemoteHistory();
+      } else {
+        localHistory.addEntry(formValues, res);
+      }
+
       setToast({ message: `Predicted ${res.predicted_score.toFixed(1)} · grade ${res.grade}`, tone: "success" });
     } catch (e) {
       setError(e.message);
@@ -67,6 +155,44 @@ export default function App() {
       setSubmitting(false);
     }
   };
+
+  const usingRemoteHistory = auth.isAuthed && !!activeCourseId;
+  const historyItems = usingRemoteHistory
+    ? remoteHistory.map(backendPredictionToHistoryEntry)
+    : localHistory.history;
+
+  const handleHistoryRemove = async (id) => {
+    if (usingRemoteHistory) {
+      await deletePrediction(id, auth.token);
+      refreshRemoteHistory();
+    } else {
+      localHistory.removeEntry(id);
+    }
+  };
+
+  const handleHistoryClear = async () => {
+    if (usingRemoteHistory) {
+      await Promise.all(remoteHistory.map((p) => deletePrediction(p.id, auth.token)));
+      refreshRemoteHistory();
+    } else {
+      localHistory.clearHistory();
+    }
+  };
+
+  // ---- stage: not yet decided whether to log in or continue as guest ----
+  if (!auth.checking && !auth.isAuthed && !guestMode) {
+    return (
+      <AuthScreen
+        onLogin={auth.login}
+        onSignup={auth.signup}
+        onSkip={() => setGuestMode(true)}
+      />
+    );
+  }
+
+  if (auth.checking) {
+    return <div className="min-h-screen paper-grain" />;
+  }
 
   if (stage === "select") {
     return (
@@ -97,18 +223,32 @@ export default function App() {
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-[11px] font-mono-data text-[var(--text-muted)]">
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{
-                background: backendError ? "var(--red-ink)" : "var(--teal)",
-                animation: backendError ? "none" : "pulse-dot 2.4s ease-in-out infinite",
-              }}
-            />
-            <span className="hidden sm:inline">
-              {backendError ? "backend offline" : "linear regression · scikit-learn"}
+          <div className="flex items-center gap-3 text-[11px] font-mono-data text-[var(--text-muted)]">
+            <span className="flex items-center gap-2">
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: backendError ? "var(--red-ink)" : "var(--teal)",
+                  animation: backendError ? "none" : "pulse-dot 2.4s ease-in-out infinite",
+                }}
+              />
+              <span className="hidden sm:inline">{backendError ? "backend offline" : "live"}</span>
             </span>
-            <span className="sm:hidden">{backendError ? "offline" : "live"}</span>
+            {auth.isAuthed ? (
+              <>
+                <span className="hidden sm:inline text-[var(--text-muted)]">{auth.user.email}</span>
+                <button onClick={auth.logout} className="hover:text-[var(--red-ink)] transition-colors">
+                  log out
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setGuestMode(false)}
+                className="hover:text-[var(--amber)] transition-colors"
+              >
+                log in to save history →
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -130,8 +270,23 @@ export default function App() {
         </div>
       )}
 
-      {/* Hero */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
+        {auth.isAuthed && (
+          <Reveal>
+            <div className="mb-6 sm:mb-8">
+              <CourseSwitcher
+                courses={courses}
+                activeCourseId={activeCourseId}
+                onSelect={setActiveCourseId}
+                onCreate={handleCreateCourse}
+                onDelete={handleDeleteCourse}
+                loading={coursesLoading}
+              />
+            </div>
+          </Reveal>
+        )}
+
+        {/* Hero */}
         <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-6 sm:gap-8 items-start">
           <Reveal>
             <StudentForm
@@ -149,13 +304,11 @@ export default function App() {
               <div className="flex items-baseline justify-between mb-2">
                 <h2 className="font-serif-display text-xl">Predicted Outcome</h2>
                 <span className="font-mono-data text-[11px] text-[var(--text-muted)]">
-                  final exam
+                  {usingRemoteHistory ? courses.find((c) => c.id === activeCourseId)?.name : "final exam"}
                 </span>
               </div>
 
-              {error && (
-                <p className="text-sm text-[var(--red-ink)] mb-2">{error}</p>
-              )}
+              {error && <p className="text-sm text-[var(--red-ink)] mb-2">{error}</p>}
 
               <div className="flex justify-center py-4">
                 <ScoreGauge score={result?.predicted_score} grade={result?.grade} loading={submitting} />
@@ -166,6 +319,8 @@ export default function App() {
                   ? buildRemark(result.grade, result.contribution_breakdown)
                   : "Fill in the record and predict to see a grade, teacher's remark, and score breakdown."}
               </p>
+
+              <RecommendationsPanel recommendations={result?.recommendations} />
             </div>
           </Reveal>
         </div>
@@ -196,12 +351,18 @@ export default function App() {
         {/* History + comparison */}
         <Reveal>
           <div className="mt-6 sm:mt-8">
-            <HistoryPanel
-              history={history}
-              onLoad={setFormValues}
-              onRemove={removeEntry}
-              onClear={clearHistory}
-            />
+            {auth.isAuthed && !activeCourseId ? (
+              <div className="rounded-2xl border border-[var(--ink-line)] bg-[var(--ink-panel)] p-6 sm:p-8 text-center text-sm text-[var(--text-muted)] font-mono-data">
+                create or select a course above to start saving history
+              </div>
+            ) : (
+              <HistoryPanel
+                history={historyItems}
+                onLoad={setFormValues}
+                onRemove={handleHistoryRemove}
+                onClear={handleHistoryClear}
+              />
+            )}
           </div>
         </Reveal>
 
